@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nahid's Search with Voice & Links</title>
+  <title>Nahid's Search with Voice</title>
   <style>
     * {
       margin: 0; padding: 0; box-sizing: border-box;
@@ -45,8 +45,7 @@
       flex-wrap: wrap;
       gap: 10px;
       justify-content: center;
-      position: relative;
-      margin-bottom: 30px;
+      margin-bottom: 10px;
     }
     input[type="text"] {
       flex: 1;
@@ -118,44 +117,37 @@
       background-color: #00cec9;
       color: #000;
     }
-
-    @media (max-width: 600px) {
-      .search-area {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      input[type="text"], button {
-        width: 100%;
-        min-width: unset;
-      }
-      .quick-links {
-        flex-direction: column;
-        align-items: center;
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" role="main">
     <h1>👋 Welcome Nahid</h1>
-    <div id="datetime">Loading time...</div>
+    <div id="datetime" aria-live="polite">Loading time...</div>
     <div class="search-area">
-      <input type="text" id="searchInput" placeholder="Search Google..." autocomplete="off" />
-      <button class="mic-btn" onclick="startVoiceSearch()">🎤</button>
-      <button onclick="search()">Search</button>
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search Google..."
+        autocomplete="off"
+        aria-label="Search input"
+      />
+      <button class="mic-btn" onclick="startVoiceSearch()" aria-label="Start voice search">🎤</button>
+      <button onclick="doSearch()">Search</button>
       <button class="clear-btn" onclick="clearSearch()">Clear</button>
     </div>
 
     <div class="quick-links">
-      <a href="https://www.youtube.com" target="_blank">🔴 YouTube</a>
-      <a href="https://mail.google.com" target="_blank">📧 Gmail</a>
-      <a href="https://www.facebook.com" target="_blank">📘 Facebook</a>
-      <a href="https://web.whatsapp.com" target="_blank">💬 WhatsApp</a>
-      <a href="https://chat.openai.com" target="_blank">🤖 ChatGPT</a>
+      <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">🔴 YouTube</a>
+      <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer">📧 Gmail</a>
+      <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">📘 Facebook</a>
+      <a href="https://web.whatsapp.com" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
+      <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">🤖 ChatGPT</a>
     </div>
   </div>
 
   <script>
+    const searchInput = document.getElementById('searchInput');
+
     function updateDateTime() {
       const now = new Date();
       const options = {
@@ -185,17 +177,15 @@
       document.querySelector("h1").textContent = `👋 ${greeting}`;
     }
 
-    function search() {
-      const query = document.getElementById("searchInput").value.trim();
-      if (!query) return;
-      const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-      window.location.href = url;
+    function doSearch() {
+      const q = searchInput.value.trim();
+      if (!q) return;
+      window.location.href = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
     }
 
     function clearSearch() {
-      const input = document.getElementById("searchInput");
-      input.value = "";
-      input.focus();
+      searchInput.value = '';
+      searchInput.focus();
     }
 
     function startVoiceSearch() {
@@ -203,12 +193,10 @@
         alert("Your browser doesn't support Speech Recognition");
         return;
       }
-
       const recognition = new webkitSpeechRecognition();
-      recognition.lang = 'en-US';
+      recognition.lang = 'en-US'; // English language
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
-
       recognition.start();
 
       recognition.onstart = () => {
@@ -219,7 +207,7 @@
         const transcript = event.results[0][0].transcript;
         searchInput.value = transcript;
         searchInput.placeholder = "Search Google...";
-        search();
+        doSearch();
       };
 
       recognition.onerror = (event) => {
@@ -233,13 +221,7 @@
       };
     }
 
-    // Trigger search on Enter key press
-    document.getElementById("searchInput").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        search();
-      }
-    });
-
+    // Initialize date/time and greeting
     function init() {
       updateDateTime();
       updateGreeting();
@@ -247,6 +229,15 @@
       setInterval(updateGreeting, 60000);
     }
     init();
+
+
+    searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    doSearch();
+  }
+});
+
   </script>
 </body>
 </html>
